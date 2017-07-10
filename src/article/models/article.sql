@@ -39,3 +39,10 @@ from tb_article
 order by no desc;
 
 
+SELECT B.*
+FROM (SELECT rownum AS rnum, A.*
+		FROM (SELECT no, title, name, regdate, viewcount
+				FROM tb_article
+				ORDER BY no desc) A ) B
+WHERE rnum between 11 and 20;
+

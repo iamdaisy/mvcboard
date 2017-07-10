@@ -9,18 +9,17 @@ import article.models.ArticleDAO;
 import article.models.ArticleDAOImpl;
 import article.models.ArticleVO;
 
-public class ArticleDetail extends AbstractController {
-	private static Logger logger = Logger.getLogger(ArticleDetail.class);
-
-	@Override
+public class ArticleUpdate extends AbstractController {
+	private static Logger logger = Logger.getLogger(ArticleUpdate.class);
+	
 	public ModelAndeView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
+		
 		
 		ArticleDAO articleDAO = ArticleDAOImpl.getInstance();
 		try {
 			long no = Long.parseLong(request.getParameter("no"));
-			articleDAO.updateViewcount(no);
 			ArticleVO articleVO = articleDAO.getDetail(no);
-			return new ModelAndeView("/WEB-INF/views/article/detail.jsp", "articleVO", articleVO);
+			return new ModelAndeView("/WEB-INF/views/article/update.jsp", "articleVO", articleVO);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -29,7 +28,7 @@ public class ArticleDetail extends AbstractController {
 			mav.addObject("url", "list");
 			return mav;
 		}
+		
 	}
-	
 
 }
