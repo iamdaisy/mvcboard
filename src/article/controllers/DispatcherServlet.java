@@ -13,14 +13,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 public class DispatcherServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
-	// log4j 변수설정
+	/* //log4j 변수설정
 	private static Logger logger = Logger.getLogger(DispatcherServlet.class);
+	*/
+	private static Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
 	
 	private static Map<String, AbstractController> controllerMap =
 				new HashMap<String, AbstractController>();

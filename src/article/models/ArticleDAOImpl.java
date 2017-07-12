@@ -1,15 +1,17 @@
 package article.models;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
+import article.controllers.PageNation;
 
 public class ArticleDAOImpl implements ArticleDAO {
 	private static ArticleDAOImpl articleDAO = null;
@@ -18,9 +20,17 @@ public class ArticleDAOImpl implements ArticleDAO {
 	private String url = null;
 	private String username = null;
 	private String password = null;
+	private DataSource ds = null;
+	
 	
 	private ArticleDAOImpl() {
-		Properties pr = new Properties();
+		   try {
+		      Context context = new InitialContext();
+		      ds = (DataSource)context.lookup("java:/comp/env/jdbc/mydbcp");
+		   } catch(Exception e) {
+		      e.printStackTrace();
+		   }
+		/*Properties pr = new Properties();
 		String props =
 			this.getClass().getResource("").getPath() + "/database.properties";
 		try {
@@ -34,10 +44,10 @@ public class ArticleDAOImpl implements ArticleDAO {
 			Class.forName(driver);
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 	private Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(url, username, password);
+		return ds.getConnection();
 	}
 	
 	public static ArticleDAOImpl getInstance() {
@@ -268,6 +278,68 @@ public class ArticleDAOImpl implements ArticleDAO {
 		
 		
 	}
+	   @Override
+	   public long getTotalCount() throws Exception {
+	      long result = 0;
+
+	      Connection cn = null;
+	      PreparedStatement ps = null;
+	      ResultSet rs = null;
+
+	      StringBuffer sql = new StringBuffer();
+	      sql.append(" SELECT count(*) AS cnt");
+	      sql.append(" FROM tb_article");
+
+	      try {
+	         cn = getConnection();
+	         ps = cn.prepareStatement(sql.toString());
+	         rs = ps.executeQuery();
+
+	         if (rs.next()) {
+	            result = rs.getLong("cnt");
+	         }
+	      } finally {
+	         dbClose(rs, ps, cn);
+	      }
+	      return result;
+
+	   }
+	@Override
+	public List<ArticleVO> getArticleList(PageNation pageNation) throws Exception {
+		Connection cn =null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 		
+		List<ArticleVO> list = new ArrayList<ArticleVO>();
+		StringBuffer sql = new StringBuffer();
+		sql.append(" SELECT B.*");
+		sql.append(" FROM (SELECT rownum AS rnum, A.*");
+		sql.append(" 		FROM (SELECT no, title, name, regdate, viewcount");
+		sql.append(" 				FROM tb_article");
+		sql.append(" 				ORDER BY no desc) A ) B");
+		sql.append(" WHERE rnum between ? and ?");
+	
+		try {
+			cn = getConnection();
+			ps = cn.prepareStatement(sql.toString());
+			ps.setLong(1, pageNation.getStartnum());
+			ps.setLong(2, pageNation.getEndnum());
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				ArticleVO articleVO = new ArticleVO();
+				articleVO.setNo(rs.getLong("no"));
+				articleVO.setTitle(rs.getString("title"));
+				articleVO.setName(rs.getString("name"));
+				articleVO.setRegdate(rs.getDate("regdate"));
+				articleVO.setViewcount(rs.getInt("viewcount"));
+				list.add(articleVO);
+			}
+		} finally {
+			dbClose(rs, ps, cn);
+		}
+		return list;
+
+	}
 }
 
