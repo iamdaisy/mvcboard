@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="article">
+<typeAlias alias = "ArticleVO" type="article.models.ArticleVO"/>
+<typeAlias alias = "PageNation" type="article.controllers.PageNation"/>
+<cacheModel type="memory" id="listCache">
+	<flushInterval hours="24" />
+	<flushOnExecute statement="article.insertArticle"/>    <!--자원활용이 용이-->
+	<flushOnExecute statement="article.updateArticle"/>
+	<flushOnExecute statement="article.deleteArticle"/>
+</cacheModel>
+
+<resultMap class="ArticleVO" id="articleMap">
+	<result property="no"	column="no"/>
+	<result property="title"	column="title"/>
+	<result property="name"	column="name"/>
+	<result property="regdate"	column="regdate"/>
+	<result property="viewcount"	column="viewcount"/>
+
+</resultMap>
+
+<insert id="insertArticle" parameterClass="ArticleVO">
+INSERT INTO tb_article(no, title, name, pwd, content)
+		VALUES(seq_article.nextval, #title#, #name#, #pwd#, #content#)
+
+</insert>
+<select id="getDetail" parameterClass="long" resultClass="ArticleVO">
+SELECT no, title, name, regdate, viewcount, content
+FROM tb_article
+WHERE no=#no#
+</select>
+
+<update id="updateViewcount" parameterClass="long">
+update tb_article set
+        viewcount = viewcount + 1
+ where no  = #no#
+</update>
+
+<update id="updateArticle" parameterClass="ArticleVO">
+UPDATE tb_article SET
+	        name = #name#
+		   ,title = #title#
+		   ,content = #content#
+WHERE no=#no# AND pwd=#pwd#
+
+</update>
+
+
+<delete id="deleteArticle" parameterClass="ArticleVO">
+DELETE FROM tb_article
+WHERE no=#no# AND pwd=#pwd#
+</delete>
+
+
+<select id="getTotalCount" resultClass="Long">
+SELECT count(*) AS cnt
+FROM tb_article
+</select>
+
+
+<select id="getArticleList" parameterClass="PageNation" 
+resultMap="articleMap" cacheModel="listCache">
+SELECT B.*
+FROM (SELECT rownum AS rnum, A.*
+		FROM (SELECT no, title, name, regdate, viewcount
+ 				FROM tb_article
+ 				ORDER BY no desc) A ) B
+ WHERE rnum between #startnum# and #endnum#
+
+</select>
+
+
+</sqlMap>

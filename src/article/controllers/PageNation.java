@@ -39,23 +39,25 @@ public class PageNation {
 		}
 		if(pageCount <endPage) endPage = pageCount;
 		
-		if(startPage == 1) {
-			display.append("[이전블럭]");
-		}else {
-			display.append(" <a href='list?pg=" + (startPage - 1) + "'>[이전블럭]</a> ");
+		display.append("<ul class='pagination'>");
+		if (startPage == 1) {
+			display.append("<li><a>[이전블럭]</a></li>");
+		} else {
+			display.append("<li><a href='list?pg=" + (startPage - 1) + "'>[이전블럭]</a></li>");
 		}
 		for(long p = startPage; p <= endPage; p++) {
-			if( p == pg ) {
-				display.append(" " + p + " ");
-			}else {
-				display.append(" <a href='list?pg=" + p + "'>" + p + "</a> ");
+			if (p == pg) {
+				display.append("<li class=\"active\"><a>" + p + "</a></li>");
+			} else {
+				display.append("<li><a href='list?pg="+ p + "'>" + p + "</a></li>");
 			}
 		}
-		if(endPage == pageCount) {
-			display.append("[다음블럭]");
-		}else {
-			display.append(" <a href='list?pg=" + (endPage + 1) + "'>[다음블럭]</a> ");
+		if (endPage == pageCount) {
+			display.append("<li><a>[다음블럭]</a></li>");
+		} else {
+			display.append("<li><a href='list?pg=" + (endPage + 1) + "'>[다음블럭]</a></li>");
 		}
+		display.append("</ul>");
 	}
 
 	public long getPg() {
@@ -144,7 +146,4 @@ public class PageNation {
 				+ blockSize + ", pageSize=" + pageSize + ", startPage=" + startPage + ", endPage=" + endPage
 				+ ", startnum=" + startnum + ", endnum=" + endnum + ", display=" + display + "]";
 	}
-	
 }
-
-
